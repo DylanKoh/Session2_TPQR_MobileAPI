@@ -14,13 +14,20 @@ namespace Session2_TPQR_MobileAPI.Controllers
     {
         private Session2Entities db = new Session2Entities();
 
-        // GET: Packages
-        public ActionResult Index()
+        public PackagesController()
         {
-            return View(db.Packages.ToList());
+            db.Configuration.LazyLoadingEnabled = false;
         }
 
-        // GET: Packages/Details/5
+        // POST: Packages
+        [HttpPost]
+        public ActionResult Index()
+        {
+            return Json(db.Packages.ToList());
+        }
+
+        // POST: Packages/Details/5
+        [HttpPost]
         public ActionResult Details(int? id)
         {
             if (id == null)
@@ -32,88 +39,46 @@ namespace Session2_TPQR_MobileAPI.Controllers
             {
                 return HttpNotFound();
             }
-            return View(package);
+            return Json(package);
         }
 
-        // GET: Packages/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
 
         // POST: Packages/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "packageId,packageTier,packageName,packageValue,packageQuantity")] Package package)
         {
             if (ModelState.IsValid)
             {
-                db.Packages.Add(package);
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                var checkPackage = db.Packages.Where(x => x.packageName == package.packageName).Select(x => x).FirstOrDefault();
+                if (checkPackage != null)
+                {
+                    return Json("Package Name has been taken!");
+                }
+                else if (package.packageTier == "Gold" && package.packageValue < 50000)
+                {
+                    return Json("Package value for Gold Tier is invalid!");
+                }
+                else if (package.packageTier == "Silver" && (package.packageValue <= 10000 || package.packageValue >= 50000))
+                {
+                    return Json("Package value for Silver Tier is invalid!");
+                }
+                else if (package.packageTier == "Bronze" && (package.packageValue <= 0 || package.packageValue > 10000))
+                {
+                    return Json("Package value for Bronze Tier is invalid!");
+                }
+                else
+                {
+                    db.Packages.Add(package);
+                    db.SaveChanges();
+                    return Json("Package created successfully!");
+                }
+                
             }
 
-            return View(package);
+            return Json("An error occurred while attempting to create package! Please try again later");
         }
 
-        // GET: Packages/Edit/5
-        public ActionResult Edit(int? id)
-        {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            Package package = db.Packages.Find(id);
-            if (package == null)
-            {
-                return HttpNotFound();
-            }
-            return View(package);
-        }
 
-        // POST: Packages/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "packageId,packageTier,packageName,packageValue,packageQuantity")] Package package)
-        {
-            if (ModelState.IsValid)
-            {
-                db.Entry(package).State = EntityState.Modified;
-                db.SaveChanges();
-                return RedirectToAction("Index");
-            }
-            return View(package);
-        }
-
-        // GET: Packages/Delete/5
-        public ActionResult Delete(int? id)
-        {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            Package package = db.Packages.Find(id);
-            if (package == null)
-            {
-                return HttpNotFound();
-            }
-            return View(package);
-        }
-
-        // POST: Packages/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id)
-        {
-            Package package = db.Packages.Find(id);
-            db.Packages.Remove(package);
-            db.SaveChanges();
-            return RedirectToAction("Index");
-        }
 
         protected override void Dispose(bool disposing)
         {
