@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.Entity;
 using System.Linq;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Web;
 using System.Web.Mvc;
 using Session2_TPQR_MobileAPI;
@@ -42,6 +43,25 @@ namespace Session2_TPQR_MobileAPI.Controllers
             return Json(package);
         }
 
+        // POST: Packages/GetCustomView
+        [HttpPost]
+        public ActionResult GetCustomView()
+        {
+            var getPackages = (from x in db.Packages
+                               where x.packageQuantity > 0
+                               select x).ToList();
+            var getPackagesList = (from x in getPackages
+                                   select new
+                                   {
+                                       PackageID = x.packageId,
+                                       PackageName = x.packageName,
+                                       AvailableQuantity = x.packageQuantity,
+                                       PackageTier = x.packageTier,
+                                       PackageValue = x.packageValue,
+                                       Benefits = string.Join(", ", db.Benefits.Where(y => y.packageIdFK == x.packageId).Select(y => y.benefitName).ToArray())
+                                   });
+            return Json(getPackagesList.ToList());
+        }
 
         // POST: Packages/Create
         [HttpPost]
@@ -72,7 +92,7 @@ namespace Session2_TPQR_MobileAPI.Controllers
                     db.SaveChanges();
                     return Json("Package created successfully!");
                 }
-                
+
             }
 
             return Json("An error occurred while attempting to create package! Please try again later");
@@ -88,5 +108,6 @@ namespace Session2_TPQR_MobileAPI.Controllers
             }
             base.Dispose(disposing);
         }
+
     }
 }
