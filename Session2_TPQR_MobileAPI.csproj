@@ -135,6 +135,9 @@
       <DependentUpon>Session2Model.tt</DependentUpon>
     </Compile>
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\PackagesController.cs" />
+    <Compile Include="Controllers\UsersController.cs" />
+    <Compile Include="Controllers\User_TypeController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -221,6 +224,9 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Models\" />
+    <Folder Include="Views\Packages\" />
+    <Folder Include="Views\Users\" />
+    <Folder Include="Views\User_Type\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff2" />
