@@ -61,12 +61,20 @@ namespace Session2_TPQR_MobileAPI.Controllers
             {
                 var getBooking = db.Bookings.Where(x => x.bookingId == id).Select(x => x).FirstOrDefault();
                 var getPackage = db.Packages.Where(x => x.packageId == getBooking.packageIdFK).Select(x => x).FirstOrDefault();
-                getPackage.packageQuantity += getBooking.quantityBooked;
-                db.SaveChanges();
-                getBooking.quantityBooked = quantity;
-                getBooking.status = "Pending";
-                db.SaveChanges();
-                return Json("Booking edited successfully!");
+                if (getPackage.packageQuantity + getBooking.quantityBooked - quantity < 0)
+                {
+                    return Json("Package do not have enough quantity for new amount!");
+                }
+                else
+                {
+                    getPackage.packageQuantity += getBooking.quantityBooked;
+                    db.SaveChanges();
+                    getBooking.quantityBooked = quantity;
+                    getBooking.status = "Pending";
+                    db.SaveChanges();
+                    return Json("Booking edited successfully!");
+                }
+                
             }
             catch (Exception)
             {
