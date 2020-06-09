@@ -53,7 +53,7 @@ namespace Session2_TPQR_MobileAPI.Controllers
         }
 
 
-        // POST: Bookings/Edit/5
+        // POST: Bookings/Edit/5?quantity={}
         [HttpPost]
         public ActionResult Edit(int id, int quantity)
         {
@@ -84,6 +84,50 @@ namespace Session2_TPQR_MobileAPI.Controllers
             
         }
 
+        // POST: Bookings/ApproveBookings/5?value={}
+        [HttpPost]
+        public ActionResult ApproveBookings(int id, string value)
+        {
+            if (value == "Approved")
+            {
+                var getBooking = db.Bookings.Find(id);
+                var getPackage = db.Packages.Where(x => x.packageId == getBooking.packageIdFK).Select(x => x).FirstOrDefault();
+                if (getPackage.packageQuantity - getBooking.quantityBooked < 0)
+                {
+                    return Json("Unable to approve booking! Package quantity is not enough!");
+                }
+                else
+                {
+                    getPackage.packageQuantity -= getBooking.quantityBooked;
+                    getBooking.status = "Approved";
+                    db.SaveChanges();
+                    return Json("Booking approved successfully!");
+                }
+                
+            }
+            else
+            {
+                var getBooking = db.Bookings.Find(id);
+                getBooking.status = "Rejected";
+                db.SaveChanges();
+                return Json("Booking rejected successfully!");
+            }
+        }
+
+        // POST: Bookings/GetManagerView
+        [HttpPost]
+        public ActionResult GetManagerView()
+        {
+            var getBookings = (from x in db.Bookings
+                               join y in db.Packages on x.packageIdFK equals y.packageId
+                               join z in db.Users on x.userIdFK equals z.userId
+                               select new { BookingID = x.bookingId, CompanyName = z.name, PackageName = y.packageName, Status = x.status })
+                               .OrderBy(x => x.Status == "Rejected")
+                               .ThenBy(x => x.Status == "Approved")
+                               .ThenBy(x => x.Status == "Pending");
+            return Json(getBookings.ToList());
+        }
+
         // POST: Bookings/Delete/5
         [HttpPost, ActionName("Delete")]
         public ActionResult DeleteConfirmed(int id)
@@ -102,7 +146,7 @@ namespace Session2_TPQR_MobileAPI.Controllers
         public ActionResult GetSpecificBookings(string userID)
         {
             var getApproved = (from x in db.Bookings
-                               where x.userIdFK == userID && x.status != "Pending"
+                               where x.userIdFK == userID && x.status == "Approved"
                                join y in db.Packages on x.packageIdFK equals y.packageId
                                select new
                                {
