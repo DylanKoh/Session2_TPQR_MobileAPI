@@ -134,6 +134,7 @@
     <Compile Include="Booking.cs">
       <DependentUpon>Session2Model.tt</DependentUpon>
     </Compile>
+    <Compile Include="Controllers\BenefitsController.cs" />
     <Compile Include="Controllers\BookingsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\PackagesController.cs" />
@@ -225,6 +226,7 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Models\" />
+    <Folder Include="Views\Benefits\" />
     <Folder Include="Views\Bookings\" />
     <Folder Include="Views\Packages\" />
     <Folder Include="Views\Users\" />
